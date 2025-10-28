@@ -7,6 +7,8 @@
 
 # testing
 /coverage
+playwright-report/
+test-results/
 
 # production
 /build
@@ -21,6 +23,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 *.zip
 *.crx
@@ -35,3 +38,6 @@ firefox-source-code/
 
 .idea/
 .qoder/
+package-lock.json
+*.backup
+DEBUG_LOG*.md

@@ -76,9 +76,28 @@ function App() {
         setPageInfo({ title: tab.title, url: tab.url });
         setTitle(sanitizeTitle(tab.title));
 
-        // Check if we're on a supported chat page
-        const chatPages = ['chat.openai.com', 'claude.ai'];
-        const isChat = chatPages.some(domain => tab.url.includes(domain));
+        // Determine if we're on a supported chat page using manifest host_permissions
+        const manifest = chrome.runtime.getManifest();
+        const hostPerms = (manifest && manifest.host_permissions) ? manifest.host_permissions : [];
+        const supportedHosts = hostPerms
+          .map((pattern) => {
+            try {
+              const urlLike = pattern.replace('*', '');
+              return new URL(urlLike).hostname;
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter(Boolean);
+
+        let isChat = false;
+        try {
+          const tabHost = new URL(tab.url).hostname;
+          isChat = supportedHosts.some((host) => tabHost === host || tabHost.endsWith('.' + host));
+        } catch (e) {
+          // Fallback when URL parsing fails
+          isChat = supportedHosts.some((host) => tab.url.includes(host));
+        }
         setIsOnChatPage(isChat);
 
         // Auto-switch to chat mode if on chat page

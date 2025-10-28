@@ -59,10 +59,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case 'saveSettings':
       chrome.storage.sync.set(request.settings, () => {
         sendResponse({ success: true });
-        // Notify all tabs to update settings
+        // Notify supported tabs to update settings based on manifest host_permissions
+        const manifest = chrome.runtime.getManifest();
+        const hostPerms = (manifest && manifest.host_permissions) ? manifest.host_permissions : [];
+        const supportedHosts = hostPerms
+          .map((pattern) => {
+            try {
+              const urlLike = pattern.replace('*', '');
+              return new URL(urlLike).hostname;
+            } catch (e) {
+              return null;
+            }
+          })
+          .filter(Boolean);
+
         chrome.tabs.query({}, (tabs) => {
           tabs.forEach(tab => {
-            if (tab.url && (tab.url.includes('chat.openai.com') || tab.url.includes('chatgpt.com') || tab.url.includes('claude.ai'))) {
+            if (!tab.url) return;
+            let shouldNotify = false;
+            try {
+              const tabHost = new URL(tab.url).hostname;
+              shouldNotify = supportedHosts.some((host) => tabHost === host || tabHost.endsWith('.' + host));
+            } catch (e) {
+              shouldNotify = supportedHosts.some((host) => tab.url.includes(host));
+            }
+            if (shouldNotify) {
               chrome.tabs.sendMessage(tab.id, { action: 'updateSettings' });
             }
           });
