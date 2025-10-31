@@ -23,6 +23,7 @@ Chat Clip Obsidianは、Web版生成AIチャットサービスの会話を効率
 - ✅ **ChatGPT** (`chat.openai.com`, `chatgpt.com`)
 - ✅ **Claude** (`claude.ai`)
 - ✅ **Google Gemini** (`gemini.google.com`)
+- ✅ **NotebookLM** (`notebooklm.google.com`)
 
 ### 今後対応予定
 - 🔄 **Perplexity AI**
